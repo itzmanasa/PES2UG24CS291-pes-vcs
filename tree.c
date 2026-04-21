@@ -212,9 +212,15 @@ static int write_tree_recursive(const IndexEntry *entries, int count,
     return rc;
 }
 
+static int compare_index_entries_by_path(const void *a, const void *b) {
+    return strcmp(((const IndexEntry *)a)->path, ((const IndexEntry *)b)->path);
+}
+
 int tree_from_index(ObjectID *id_out) {
-    // TODO: Implement recursive tree building
-    // (See Lab Appendix for logical steps)
-    (void)id_out;
-    return -1;
+    Index index;
+    if (index_load(&index) != 0) return -1;
+
+    qsort(index.entries, index.count, sizeof(IndexEntry), compare_index_entries_by_path);
+
+    return write_tree_recursive(index.entries, index.count, "", id_out);
 }
