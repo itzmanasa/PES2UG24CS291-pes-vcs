@@ -110,6 +110,8 @@ unsigned char *buffer = malloc(total_size);
 if (!buffer) return -1;
 
 memcpy(buffer, header, header_len);
+buffer[header_len] = '\0';
+memcpy(buffer + header_len + 1, data, len);
 // Step 3: Compute SHA-256 hash of the object buffer
 unsigned char hash[SHA256_DIGEST_LENGTH];
 SHA256(buffer, total_size, hash);
@@ -120,15 +122,14 @@ for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
     sprintf(hash_hex + i * 2, "%02x", hash[i]);
 }
 hash_hex[64] = '\0';
+
+// Step 4: Create directory structure
 char dir_path[256];
 snprintf(dir_path, sizeof(dir_path), ".pes/objects/%.2s", hash_hex);
 
-// Create directories (ignore errors if they already exist)
 mkdir(".pes", 0700);
 mkdir(".pes/objects", 0700);
 mkdir(dir_path, 0700);
-buffer[header_len] = '\0';
-memcpy(buffer + header_len + 1, data, len);
 
 (void)type; (void)data; (void)len; (void)id_out;
 return -1;
