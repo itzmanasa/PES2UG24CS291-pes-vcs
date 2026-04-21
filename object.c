@@ -162,8 +162,14 @@ if (check) {
         return -1;
     }
 }
-(void)type; (void)data; (void)len; (void)id_out;
-return -1;
+// Fill output ID (store hex hash)
+memcpy(id_out->hash, hash_hex, 65);
+
+// Free allocated memory
+free(buffer);
+
+// Success
+return 0;;
 } 
 
 // Read an object from the store.
