@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -119,6 +120,13 @@ for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
     sprintf(hash_hex + i * 2, "%02x", hash[i]);
 }
 hash_hex[64] = '\0';
+char dir_path[256];
+snprintf(dir_path, sizeof(dir_path), ".pes/objects/%.2s", hash_hex);
+
+// Create directories (ignore errors if they already exist)
+mkdir(".pes", 0700);
+mkdir(".pes/objects", 0700);
+mkdir(dir_path, 0700);
 buffer[header_len] = '\0';
 memcpy(buffer + header_len + 1, data, len);
 
