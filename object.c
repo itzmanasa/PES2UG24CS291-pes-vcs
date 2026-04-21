@@ -7,7 +7,7 @@
 //
 // PROVIDED functions: compute_hash, object_path, object_exists, hash_to_hex, hex_to_hash
 // TODO functions:     object_write, object_read
-
+#include <openssl/sha.h>
 #include "pes.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -109,6 +109,16 @@ unsigned char *buffer = malloc(total_size);
 if (!buffer) return -1;
 
 memcpy(buffer, header, header_len);
+// Step 3: Compute SHA-256 hash of the object buffer
+unsigned char hash[SHA256_DIGEST_LENGTH];
+SHA256(buffer, total_size, hash);
+
+// Convert hash to hex string
+char hash_hex[65];
+for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+    sprintf(hash_hex + i * 2, "%02x", hash[i]);
+}
+hash_hex[64] = '\0';
 buffer[header_len] = '\0';
 memcpy(buffer + header_len + 1, data, len);
 
