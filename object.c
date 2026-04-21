@@ -130,7 +130,38 @@ snprintf(dir_path, sizeof(dir_path), ".pes/objects/%.2s", hash_hex);
 mkdir(".pes", 0700);
 mkdir(".pes/objects", 0700);
 mkdir(dir_path, 0700);
+// Step 5: Write object to disk (atomic)
 
+// final path
+char file_path[512];
+snprintf(file_path, sizeof(file_path),
+         ".pes/objects/%.2s/%s", hash_hex, hash_hex + 2);
+
+// temp path
+char temp_path[512];
+snprintf(temp_path, sizeof(temp_path), "%s.tmp", file_path);
+
+// if file already exists, skip writing (dedup)
+FILE *check = fopen(file_path, "rb");
+if (check) {
+    fclose(check);
+} else {
+    FILE *f = fopen(temp_path, "wb");
+    if (!f) { free(buffer); return -1; }
+
+    if (fwrite(buffer, 1, total_size, f) != total_size) {
+        fclose(f);
+        free(buffer);
+        return -1;
+    }
+
+    fclose(f);
+
+    if (rename(temp_path, file_path) != 0) {
+        free(buffer);
+        return -1;
+    }
+}
 (void)type; (void)data; (void)len; (void)id_out;
 return -1;
 } 
